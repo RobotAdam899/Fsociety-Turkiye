@@ -1,9 +1,8 @@
 import socket
 import argparse
-import os
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-p", "--port", type=int, default=8080, help="Dinlenecek port")
+parser.add_argument("-p", "--port", type=int, default=5000, help="Dinlenecek port")
 args = parser.parse_args()
 
 ip = "0.0.0.0"
@@ -26,8 +25,8 @@ def menu():
 ║ - spam-istek <sayi>   (Max 1000)          ║
 ║ - olustur-dosya <sayi> (Max 100)          ║
 ║ - youtube <link>                          ║
-║ - sound local                             ║
 ║ - wifi-off                                ║
+║ - sound local                             ║
 ║ - bildirim "Başlık" "İçerik"              ║
 ║ - bildirim-say                            ║
 ║ - kilit                                   ║
