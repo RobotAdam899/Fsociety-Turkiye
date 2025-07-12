@@ -3,7 +3,7 @@ import socket
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-p", "--port", type=int, default=4444, help="Port numarası")
+parser.add_argument("-p", "--port", type=int, default=4444, help="Port numarasÄ±")
 args = parser.parse_args()
 
 host = "0.0.0.0"
@@ -15,7 +15,7 @@ s.listen(1)
 print(f"[+] Dinleniyor: {host}:{port}")
 
 client, addr = s.accept()
-print(f"[+] Bağlandı: {addr[0]}:{addr[1]}")
+print(f"[+] BaÄŸlandÄ±: {addr[0]}:{addr[1]}")
 
 try:
     while True:
