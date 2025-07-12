@@ -25,7 +25,7 @@ while True:
         cevap = client.recv(4096).decode()
         print(f"\n{cevap}\n")
     except KeyboardInterrupt:
-        print("\n[!] Bağlantı kapatılıyor...")
+        print("\n[!] Çıkılıyor...")
         client.send("exit".encode())
         client.close()
         break
