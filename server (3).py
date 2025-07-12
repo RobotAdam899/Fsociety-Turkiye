@@ -8,7 +8,8 @@ komut_listesi = {
     'udp-spam IP PORT MESAJ': 'Belirtilen IP ve porta UDP mesajÄ± yollar',
     'arka-plan <dosya.jpg>': 'CihazÄ±n arka planÄ±nÄ± deÄŸiÅŸtirir',
     'yÃ¼kle': 'Telefonu CPU ile meÅŸgul eder',
-    'nmap IP': 'IP adresine port taramasÄ± yapar'
+    'nmap IP': 'IP adresine port taramasÄ± yapar',
+    'google ARAMA': 'Cihazda Google aramasÄ± baÅŸlatÄ±r'
 }
 
 parser = argparse.ArgumentParser()
