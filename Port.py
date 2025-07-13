@@ -20,7 +20,7 @@ except Exception as e:
 
 while True:
     try:
-        komut = input("Komut > ")
+        komut = input("[FSOCIETY@PHONE ~]$ ")
         client.send(komut.encode())
         if komut == "exit":
             break
