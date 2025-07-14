@@ -1,1 +1,1 @@
-Fscoiety hoş geldin kanka
+T-scoiety hoş geldin kanka
