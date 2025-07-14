@@ -1,56 +1,45 @@
 import socket
-import os
-import urllib.request
-import time
 
-SERVER_IP = input("Modem IP gir: ")
+def ip_tara(modem_ip):
+    aktifler = []
+    ip_parca = ".".join(modem_ip.split(".")[:-1])
+    for i in range(1, 255):
+        ip = f"{ip_parca}.{i}"
+        try:
+            s = socket.socket()
+            s.settimeout(0.2)
+            s.connect((ip, PORT))
+            aktifler.append(ip)
+            s.close()
+        except:
+            pass
+    return aktifler
+
 PORT = int(input("Port gir: "))
+modem_ip = input("Modem IP gir (örn: 192.168.1.1): ")
 
-s = socket.socket()
-try:
-    s.connect((SERVER_IP, PORT))
-    s.send("[✓] Baglanti basarili.\n".encode())
-except:
-    print("[!] Baglanti hatasi.")
+cihazlar = ip_tara(modem_ip)
+if not cihazlar:
+    print("[!] Aktif cihaz bulunamadi.")
     exit()
 
-def arkaplan_degistir(url):
+print("[*] Aktif IP'ler:")
+for i, ip in enumerate(cihazlar):
+    print(f"[{i+1}] {ip}")
+
+sec = input("[>] Secilecek IP no (tumu icin *): ")
+hedefler = cihazlar if sec == "*" else [cihazlar[int(sec)-1]]
+
+for ip in hedefler:
     try:
-        urllib.request.urlretrieve(url, "arkaplan.jpg")
-        os.system("termux-wallpaper -f arkaplan.jpg")
-        s.send("[✓] Arka plan degistirildi\n".encode())
+        s = socket.socket()
+        s.connect((ip, PORT))
+        s.send("[✓] Baglanti kuruldu\n".encode())
+        while True:
+            komut = s.recv(1024).decode().strip()
+            if komut == "exit":
+                break
+            print(f"[{ip}] Komut alindi: {komut}")
+        s.close()
     except:
-        s.send("[!] Arka plan degistirilemedi\n".encode())
-
-def uyari_gonder(mesaj):
-    os.system(f'termux-notification --title "UYARI" --content "{mesaj}" --priority high')
-    s.send("[✓] Uyari gonderildi\n".encode())
-
-def google_ac():
-    os.system("termux-open-url https://www.google.com")
-    s.send("[✓] Google acildi\n".encode())
-
-def saldiri():
-    while True:
-        os.system("ls > /dev/null")
-
-while True:
-    try:
-        komut = s.recv(1024).decode().strip()
-        if komut.startswith("arkaplan "):
-            _, url = komut.split(" ", 1)
-            arkaplan_degistir(url)
-        elif komut.startswith("uyari "):
-            _, mesaj = komut.split(" ", 1)
-            uyari_gonder(mesaj)
-        elif komut == "google":
-            google_ac()
-        elif komut == "saldiri":
-            saldiri()
-        elif komut == "exit":
-            s.close()
-            break
-        else:
-            s.send("[!] Gecersiz komut\n".encode())
-    except:
-        break
+        print(f"[!] {ip} baglantisi basarisiz.")
