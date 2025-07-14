@@ -2,10 +2,10 @@ import socket
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-p", "--port", type=int, required=True, help="Portu belirtin (örnek: 8080)")
+parser.add_argument("-p", "--port", required=True, type=int, help="Port")
 args = parser.parse_args()
-PORT = args.port
 
+PORT = args.port
 s = socket.socket()
 try:
     s.bind(("0.0.0.0", PORT))
@@ -17,7 +17,7 @@ except Exception as e:
 
 try:
     client, addr = s.accept()
-    print(f"[✓] Baglanti kuruldu: {addr}")
+    print(f"[✓] Baglandi: {addr}")
     print(client.recv(1024).decode())
 except Exception as e:
     print(f"[!] Baglanti hatasi: {e}")
@@ -32,5 +32,5 @@ while True:
         cevap = client.recv(4096).decode()
         print(cevap)
     except Exception as e:
-        print(f"[!] Baglanti koptu: {e}")
+        print(f"[-] Baglanti koptu: {e}")
         break
