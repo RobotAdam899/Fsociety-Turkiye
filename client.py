@@ -38,7 +38,7 @@ def saka_modu(mesaj):
         os.system(f'msg * "{mesaj}"')
     elif cihaz == "Linux PC":
         os.system(f'notify-send "Şaka Modu" "{mesaj}"')
-    s.send(b"[!] Şaka modu mesajı gönderildi!\n")
+    s.send("[!] Şaka modu mesajı gönderildi!\n".encode())
 
 def google_ac():
     if cihaz == "Telefon":
